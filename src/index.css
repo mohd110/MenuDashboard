@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Color Palette - Golden Saffron Dashboard (Lumiere Light Theme) */
+  --color-bg: #FDFBF9;
+  --color-sidebar: #F9F3EE;
+  --color-primary: #4E3E2F; /* Deep Dark Brown from Figma */
+  --color-accent: #C5A880;  /* Golden Beige */
+  --color-accent-soft: #F4EFEA;
+  
+  --color-text: #2C2C2C;
+  --color-text-muted: #8E7F71;
+  --color-border: #E8E1DA;
+  
+  /* Status Colors */
+  --color-status-available: #FFFFFF;
+  --color-status-occupied: #4E3E2F;
+  --color-status-billing: #F9EBE0;
+  --color-status-cleaning: #F2F2F2;
+  
+  /* Typography */
+  --font-family: 'Gotham', 'Montserrat', sans-serif; /* Gotham Fallback */
+  
+  /* Spacing & Borders */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-soft: 0 4px 20px rgba(78, 62, 47, 0.04);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: var(--transition-smooth);
+}
+
+input {
+  font-family: inherit;
+}
+
+/* Layout Classes */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scrollable-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
