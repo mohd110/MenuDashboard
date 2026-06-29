@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, Plus, X, User, Phone, Users, ArrowRight } from 'lucide-react';
+import { Search, Bell, Plus, X, User, Phone, Users, ArrowRight, HelpCircle, Calendar, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Header = () => {
@@ -17,13 +17,26 @@ const Header = () => {
     tableId: ''
   });
 
+  const [currentDate, setCurrentDate] = useState('');
+
+  useEffect(() => {
+    const options = { day: 'numeric', month: 'short' };
+    setCurrentDate(new Date().toLocaleDateString('en-US', options));
+  }, []);
+
   const getTitle = () => {
     switch(location.pathname) {
-      case '/dashboard': return 'Table Dashboard';
+      case '/dashboard': return 'POS Dashboard';
       case '/menu': return 'Menu Catalog';
-      case '/billing': return 'Billing & Invoice';
-      case '/reports': return 'Business Reports';
-      default: return 'Golden Saffron';
+      case '/billing': {
+        const params = new URLSearchParams(location.search);
+        const tab = params.get('tab');
+        if (tab === 'online') return 'Online Orders Activity';
+        if (tab === 'actions') return 'Store Status & Actions';
+        return 'Live Billing Operations';
+      }
+      case '/reports': return 'Business Analytics';
+      default: return 'Lumiere Bistro';
     }
   };
 
@@ -100,15 +113,30 @@ const Header = () => {
     <header className="header">
       <div className="header-left">
         <h2 className="main-title">{getTitle()}</h2>
+        
+        {/* Search Bar styled like Petpooja */}
         <div className="search-bar">
-          <Search size={18} color="#8E7F71" />
+          <Search size={16} color="#8E7F71" />
           <input type="text" placeholder="Search tables, items, or orders..." />
         </div>
       </div>
 
       <div className="header-right">
+        {/* Outlet Dropdown mimicking Petpooja's header */}
+        <div className="outlet-selector">
+          <span>Main Outlet</span>
+          <ChevronDown size={14} />
+        </div>
+
+        {/* Date Display */}
+        <div className="date-display">
+          <Calendar size={15} />
+          <span>{currentDate}</span>
+        </div>
+
+        {/* New Order Trigger */}
         <button className="new-order-btn" onClick={handleOpenModal}>
-          <Plus size={18} />
+          <Plus size={16} />
           <span>New Order</span>
         </button>
 
@@ -118,11 +146,12 @@ const Header = () => {
         </div>
         
         <button className="icon-btn">
-          <Bell size={20} color="#2D241E" />
+          <Bell size={18} />
         </button>
 
-        <button className="icon-btn">
-          <div className="help-circle">?</div>
+        <button className="icon-btn font-support">
+          <HelpCircle size={18} />
+          <span className="tooltip-support">Support Agent</span>
         </button>
       </div>
 
@@ -140,7 +169,7 @@ const Header = () => {
                 {loadingTables ? (
                   <p style={{ fontSize: '0.9rem', color: '#888' }}>Loading tables...</p>
                 ) : availableTables.length === 0 ? (
-                  <p style={{ color: '#e74c3c', fontSize: '0.9rem', fontWeight: 600 }}>No available tables. Complete or clean a table first.</p>
+                  <p style={{ color: '#d9534f', fontSize: '0.9rem', fontWeight: 600 }}>No available tables. Complete or clean a table first.</p>
                 ) : (
                   <select 
                     value={customerData.tableId}
@@ -201,24 +230,26 @@ const Header = () => {
 
       <style jsx>{`
         .header {
-          height: 80px;
-          padding: 0 2.5rem;
-          background: transparent;
+          height: 70px;
+          padding: 0 2rem;
+          background: white;
+          border-bottom: 1px solid var(--color-border);
           display: flex;
           align-items: center;
           justify-content: space-between;
           z-index: 10;
+          flex-shrink: 0;
         }
 
         .header-left {
-          flex: 1;
           display: flex;
           align-items: center;
-          gap: 2rem;
+          gap: 1.5rem;
+          flex: 1;
         }
 
         .main-title {
-          font-size: 1.75rem;
+          font-size: 1.35rem;
           font-weight: 700;
           color: var(--color-primary);
           white-space: nowrap;
@@ -227,13 +258,13 @@ const Header = () => {
         .search-bar {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          background: #F4EFEA;
-          border: none;
-          padding: 0.85rem 1.5rem;
-          border-radius: 14px;
+          gap: 0.5rem;
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          padding: 0.55rem 1rem;
+          border-radius: 10px;
           width: 100%;
-          max-width: 440px;
+          max-width: 320px;
         }
 
         .search-bar input {
@@ -241,47 +272,79 @@ const Header = () => {
           background: transparent;
           outline: none;
           width: 100%;
-          font-size: 0.95rem;
+          font-size: 0.85rem;
           color: var(--color-primary);
         }
 
         .header-right {
           display: flex;
           align-items: center;
-          gap: 1.25rem;
+          gap: 1rem;
+        }
+
+        .outlet-selector {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          padding: 0.5rem 0.85rem;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--color-primary);
+          cursor: pointer;
+        }
+
+        .date-display {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          background: var(--color-accent-soft);
+          border: 1px solid var(--color-border);
+          padding: 0.5rem 0.85rem;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--color-primary);
         }
 
         .new-order-btn {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          background: var(--color-primary);
-          color: white;
-          padding: 0.85rem 1.5rem;
-          border-radius: 12px;
-          font-weight: 600;
-          font-size: 0.95rem;
-          margin-right: 0.5rem;
+          gap: 0.35rem;
+          background: var(--color-accent);
+          color: var(--color-primary);
+          padding: 0.55rem 1.1rem;
+          border-radius: 8px;
+          font-weight: 700;
+          font-size: 0.85rem;
           border: none;
           cursor: pointer;
+          transition: var(--transition-smooth);
+        }
+
+        .new-order-btn:hover {
+          background: var(--color-primary);
+          color: white;
         }
 
         .shift-badge {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.6rem 1rem;
-          background: #EDE8E3;
-          border-radius: 10px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: var(--color-primary);
+          gap: 0.35rem;
+          padding: 0.5rem 0.85rem;
+          background: rgba(46, 125, 50, 0.05);
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #2e7d32;
         }
 
         .status-dot {
-          width: 8px;
-          height: 8px;
-          background: #8E7F71;
+          width: 6px;
+          height: 6px;
+          background: #2e7d32;
           border-radius: 50%;
         }
 
@@ -289,22 +352,29 @@ const Header = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 42px;
-          height: 42px;
-          color: var(--color-primary);
-          background: none;
-          border: none;
+          width: 36px;
+          height: 36px;
+          color: var(--color-text-muted);
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
           cursor: pointer;
+          position: relative;
+          transition: var(--transition-smooth);
         }
 
-        .help-circle {
-          width: 20px;
-          height: 20px;
-          border: 1.5px solid var(--color-primary);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .icon-btn:hover {
+          color: var(--color-primary);
+          background: var(--color-accent-soft);
+        }
+
+        .font-support {
+          gap: 0.25rem;
+          width: auto;
+          padding: 0 0.5rem;
+        }
+
+        .tooltip-support {
           font-size: 0.75rem;
           font-weight: 700;
         }
@@ -326,14 +396,15 @@ const Header = () => {
 
         .modal-container {
           background: white;
-          width: 440px;
-          border-radius: 24px;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+          width: 420px;
+          border-radius: 20px;
+          box-shadow: var(--shadow-soft);
           overflow: hidden;
+          border: 1px solid var(--color-border);
         }
 
         .modal-header {
-          padding: 1.5rem 2rem;
+          padding: 1.25rem 1.5rem;
           background: var(--color-sidebar);
           display: flex;
           justify-content: space-between;
@@ -341,30 +412,30 @@ const Header = () => {
           border-bottom: 1px solid var(--color-border);
         }
 
-        .modal-header h2 { font-size: 1.25rem; font-weight: 700; color: var(--color-primary); }
+        .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--color-primary); }
         .close-modal { color: var(--color-text-muted); background: none; border: none; cursor: pointer; }
 
-        .modal-form { padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .modal-form { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
 
-        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-        .form-group label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 700; color: var(--color-text-muted); }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-group label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); }
         
         .form-group input, .form-group select {
-          padding: 0.85rem 1rem;
-          border-radius: 12px;
-          border: 1.5px solid var(--color-border);
-          font-size: 1rem;
+          padding: 0.75rem 0.85rem;
+          border-radius: 10px;
+          border: 1px solid var(--color-border);
+          font-size: 0.9rem;
           color: var(--color-primary);
           font-weight: 600;
           background: white;
           outline: none;
         }
 
-        .guest-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+        .guest-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; }
         .guest-selector button {
-          padding: 0.75rem;
-          border: 1.5px solid var(--color-border);
-          border-radius: 10px;
+          padding: 0.6rem;
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
           font-weight: 700;
           color: var(--color-text-muted);
           background: white;
@@ -376,19 +447,19 @@ const Header = () => {
           border-color: var(--color-primary);
         }
 
-        .modal-footer { margin-top: 1rem; }
+        .modal-footer { margin-top: 0.75rem; }
         .start-btn {
           width: 100%;
           background: var(--color-primary);
           color: white;
-          padding: 1.1rem;
-          border-radius: 16px;
+          padding: 0.95rem;
+          border-radius: 12px;
           font-weight: 700;
-          font-size: 1rem;
+          font-size: 0.95rem;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.75rem;
+          gap: 0.5rem;
           border: none;
           cursor: pointer;
         }

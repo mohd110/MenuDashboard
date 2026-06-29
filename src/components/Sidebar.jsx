@@ -1,22 +1,24 @@
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ClipboardList,
-  Table2, 
+  ChevronDown,
+  ChevronRight,
+  Activity,
+  Globe,
+  Sliders,
   Utensils, 
-  Wallet,
+  Archive,
   BarChart3,
+  Users,
   Settings, 
   LogOut
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: Utensils, label: 'Menu', path: '/menu' },
-    { icon: Wallet, label: 'Billing', path: '/billing' },
-    { icon: BarChart3, label: 'Reports', path: '/reports' },
-  ];
+  const location = useLocation();
+  const [dailyOpsOpen, setDailyOpsOpen] = useState(true);
 
   const handleSettings = () => {
     alert('Settings panel coming soon!');
@@ -30,27 +32,102 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar">
+      {/* Brand Header styled like Petpooja POSS */}
       <div className="sidebar-logo">
-        <div className="logo-icon-mark">🍽️</div>
+        <div className="logo-icon-container">
+          <div className="logo-icon-mark">L</div>
+        </div>
         <div className="logo-text">
-          <h1>Lumiere Bistro</h1>
-          <span>Downtown Branch</span>
+          <h1>LUMIERE</h1>
+          <span>BISTRO POS</span>
         </div>
       </div>
 
       <nav className="sidebar-nav">
-        {menuItems.map((item) => (
-          <NavLink 
-            key={item.path} 
-            to={item.path}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        {/* Dashboard Link */}
+        <NavLink 
+          to="/dashboard"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <LayoutDashboard size={20} />
+          <span>Dashboard</span>
+        </NavLink>
+
+        {/* Collapsible Daily Operations Group */}
+        <div className={`nav-group-container ${dailyOpsOpen ? 'is-open' : ''}`}>
+          <button 
+            className={`nav-item group-trigger ${location.pathname === '/billing' ? 'active-parent' : ''}`}
+            onClick={() => setDailyOpsOpen(!dailyOpsOpen)}
           >
-            <item.icon size={20} />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+            <ClipboardList size={20} />
+            <span className="flex-grow">Daily Operations</span>
+            {dailyOpsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </button>
+          
+          {dailyOpsOpen && (
+            <div className="group-children">
+              <NavLink 
+                to="/billing"
+                className={({ isActive }) => `nav-item sub-item ${isActive && !location.search.includes('tab=online') && !location.search.includes('tab=actions') ? 'active' : ''}`}
+              >
+                <Activity size={18} />
+                <span>Live Orders</span>
+              </NavLink>
+              <NavLink 
+                to="/billing?tab=online"
+                className={({ isActive }) => `nav-item sub-item ${location.search.includes('tab=online') ? 'active' : ''}`}
+              >
+                <Globe size={18} />
+                <span>Online Orders</span>
+              </NavLink>
+              <NavLink 
+                to="/billing?tab=actions"
+                className={({ isActive }) => `nav-item sub-item ${location.search.includes('tab=actions') ? 'active' : ''}`}
+              >
+                <Sliders size={18} />
+                <span>Store Actions</span>
+              </NavLink>
+            </div>
+          )}
+        </div>
+
+        {/* Menu Link */}
+        <NavLink 
+          to="/menu"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <Utensils size={20} />
+          <span>Menu Catalog</span>
+        </NavLink>
+
+        {/* Inventory (Placeholder) */}
+        <div className="nav-item disabled-item">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <Archive size={20} />
+            <span>Inventory</span>
+          </div>
+          <span className="badge">New</span>
+        </div>
+
+        {/* Reports Link */}
+        <NavLink 
+          to="/reports"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <BarChart3 size={20} />
+          <span>Reports</span>
+        </NavLink>
+
+        {/* CRM Link (Placeholder) */}
+        <div className="nav-item disabled-item">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <Users size={20} />
+            <span>CRM</span>
+          </div>
+        </div>
       </nav>
 
+      {/* Sidebar Footer */}
       <div className="sidebar-footer">
         <button className="nav-item settings-item" onClick={handleSettings}>
           <Settings size={20} />
@@ -73,128 +150,204 @@ const Sidebar = () => {
 
       <style jsx>{`
         .sidebar {
-          width: 260px;
+          width: 280px;
           height: 100vh;
           background: var(--color-sidebar);
           color: var(--color-primary);
           display: flex;
           flex-direction: column;
-          padding: 2.5rem 1.25rem;
+          padding: 2rem 1rem;
           border-right: 1px solid var(--color-border);
+          overflow-y: auto;
+          flex-shrink: 0;
         }
 
         .sidebar-logo {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          margin-bottom: 3rem;
-          padding-left: 0.25rem;
+          gap: 0.85rem;
+          margin-bottom: 2.5rem;
+          padding: 0.5rem;
+          border-bottom: 2px solid var(--color-border);
+          padding-bottom: 1.5rem;
+        }
+
+        .logo-icon-container {
+          width: 44px;
+          height: 44px;
+          background: var(--color-primary);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 10px rgba(78, 62, 47, 0.2);
         }
 
         .logo-icon-mark {
-          font-size: 1.75rem;
-          line-height: 1;
+          color: var(--color-accent);
+          font-weight: 800;
+          font-size: 1.5rem;
+          font-family: serif;
         }
 
         .logo-text h1 {
-          font-size: 1.25rem;
+          font-size: 1.15rem;
           font-weight: 800;
           color: var(--color-primary);
-          line-height: 1.2;
-          white-space: nowrap;
+          line-height: 1.1;
+          letter-spacing: 1px;
         }
 
         .logo-text span {
-          font-size: 0.75rem;
-          color: var(--color-text-muted);
-          font-weight: 500;
+          font-size: 0.7rem;
+          color: var(--color-accent);
+          font-weight: 700;
           display: block;
-          margin-top: 0.1rem;
+          margin-top: 0.15rem;
+          letter-spacing: 0.5px;
         }
 
         .sidebar-nav {
           flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
-          margin-top: 1rem;
+          gap: 0.35rem;
         }
 
         .nav-item {
           display: flex;
           align-items: center;
-          gap: 1rem;
-          padding: 0.85rem 1.25rem;
-          border-radius: var(--radius-md);
+          gap: 0.85rem;
+          padding: 0.75rem 1rem;
+          border-radius: var(--radius-sm);
           color: var(--color-text-muted);
-          font-size: 1rem;
-          font-weight: 500;
+          font-size: 0.95rem;
+          font-weight: 600;
           transition: var(--transition-smooth);
           text-decoration: none;
+          width: 100%;
+          text-align: left;
+          border: none;
+          background: transparent;
+          cursor: pointer;
         }
 
         .nav-item:hover {
-          background: rgba(78, 62, 47, 0.03);
+          background: rgba(197, 168, 128, 0.1);
           color: var(--color-primary);
         }
 
         .nav-item.active {
           background: var(--color-primary);
           color: white;
-          font-weight: 600;
+        }
+
+        .nav-item.active-parent {
+          background: rgba(78, 62, 47, 0.05);
+          color: var(--color-primary);
+        }
+
+        .group-trigger {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .flex-grow {
+          flex-grow: 1;
+        }
+
+        .group-children {
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+          padding-left: 1rem;
+          margin-top: 0.2rem;
+          border-left: 1.5px dashed var(--color-border);
+          margin-left: 1.5rem;
+        }
+
+        .sub-item {
+          padding: 0.6rem 0.85rem;
+          font-size: 0.85rem;
+          border-radius: 8px;
+        }
+
+        .disabled-item {
+          opacity: 0.6;
+          cursor: not-allowed;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .disabled-item:hover {
+          background: transparent;
+          color: var(--color-text-muted);
+        }
+
+        .badge {
+          background: var(--color-accent);
+          color: var(--color-primary);
+          font-size: 0.65rem;
+          font-weight: 800;
+          padding: 0.15rem 0.4rem;
+          border-radius: 6px;
+          text-transform: uppercase;
         }
 
         .sidebar-footer {
           margin-top: auto;
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
+          gap: 0.5rem;
+          border-top: 1px solid var(--color-border);
+          padding-top: 1.5rem;
         }
 
         .settings-item {
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.25rem;
         }
 
         .user-card {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 1rem;
-          background: white;
-          border-radius: var(--radius-md);
+          padding: 0.85rem;
+          background: rgba(197, 168, 128, 0.05);
+          border-radius: var(--radius-sm);
           border: 1px solid var(--color-border);
-          margin: 0.5rem 0;
+          margin: 0.25rem 0;
         }
 
         .avatar-small {
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           background: var(--color-primary);
           border-radius: 8px;
-          color: white;
-          font-size: 0.7rem;
+          color: var(--color-accent);
+          font-size: 0.75rem;
           font-weight: 800;
           display: flex;
           align-items: center;
           justify-content: center;
-          letter-spacing: 0.5px;
           flex-shrink: 0;
         }
 
         .user-name {
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           font-weight: 700;
           color: var(--color-primary);
         }
 
         .user-role {
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           color: var(--color-text-muted);
         }
 
         .logout:hover {
-          color: #ff6b6b;
-          background: rgba(255, 107, 107, 0.05);
+          color: #d9534f;
+          background: rgba(217, 83, 79, 0.05);
         }
       `}</style>
     </div>
