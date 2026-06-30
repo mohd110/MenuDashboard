@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { 
+import {
   LayoutDashboard, 
   ClipboardList,
   ChevronDown,
@@ -13,18 +13,18 @@ import {
   BarChart3,
   Users,
   Settings, 
-  LogOut
+  LogOut,
+  Wallet,
+  QrCode,
+  UserCog,
+  History,
 } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
   const [dailyOpsOpen, setDailyOpsOpen] = useState(true);
 
-  const handleSettings = () => {
-    alert('Settings panel coming soon!');
-  };
-
-  const handleLogout = () => {
+    const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
       window.location.href = '/';
     }
@@ -51,6 +51,15 @@ const Sidebar = () => {
         >
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
+        </NavLink>
+
+        {/* Payments Link */}
+        <NavLink 
+          to="/payments"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <Wallet size={20} />
+          <span>Payments</span>
         </NavLink>
 
         {/* Collapsible Daily Operations Group */}
@@ -118,21 +127,49 @@ const Sidebar = () => {
           <span>Reports</span>
         </NavLink>
 
-        {/* CRM Link (Placeholder) */}
-        <div className="nav-item disabled-item">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <Users size={20} />
-            <span>CRM</span>
-          </div>
-        </div>
+        {/* Orders Link */}
+        <NavLink 
+          to="/orders"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <History size={20} />
+          <span>Order History</span>
+        </NavLink>
+
+        {/* Customers Link */}
+        <NavLink 
+          to="/customers"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <Users size={20} />
+          <span>Customers</span>
+        </NavLink>
+
+        {/* QR Management Link */}
+        <NavLink 
+          to="/qr-management"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <QrCode size={20} />
+          <span>QR Management</span>
+        </NavLink>
+
+        {/* Staff Link */}
+        <NavLink 
+          to="/staff"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <UserCog size={20} />
+          <span>Staff</span>
+        </NavLink>
       </nav>
 
       {/* Sidebar Footer */}
       <div className="sidebar-footer">
-        <button className="nav-item settings-item" onClick={handleSettings}>
+        <NavLink to="/settings" className={({ isActive }) => `nav-item settings-item ${isActive ? 'active' : ''}`}>
           <Settings size={20} />
           <span>Settings</span>
-        </button>
+        </NavLink>
         
         <div className="user-card">
           <div className="avatar-small">AR</div>

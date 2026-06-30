@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, Plus, X, User, Phone, Users, ArrowRight, HelpCircle, Calendar, ChevronDown } from 'lucide-react';
+import { Search, Bell, Plus, X, User, Phone, Users, ArrowRight, HelpCircle, Calendar, ChevronDown, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+const SHIFT_KEY = 'lumiere_shift_active';
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [shiftActive, setShiftActive] = useState(() => localStorage.getItem(SHIFT_KEY) !== 'ended');
+  const [showShiftMenu, setShowShiftMenu] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [availableTables, setAvailableTables] = useState([]);
@@ -24,6 +28,19 @@ const Header = () => {
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
   }, []);
 
+  const handleEndShift = () => {
+    if (!confirm('End shift? This will disable new orders until next shift is started.')) return;
+    localStorage.setItem(SHIFT_KEY, 'ended');
+    setShiftActive(false);
+    setShowShiftMenu(false);
+  };
+
+  const handleStartShift = () => {
+    localStorage.setItem(SHIFT_KEY, 'active');
+    setShiftActive(true);
+    setShowShiftMenu(false);
+  };
+
   const getTitle = () => {
     switch(location.pathname) {
       case '/dashboard': return 'POS Dashboard';
@@ -35,7 +52,13 @@ const Header = () => {
         if (tab === 'actions') return 'Store Status & Actions';
         return 'Live Billing Operations';
       }
+      case '/payments': return 'Payment History';
       case '/reports': return 'Business Analytics';
+      case '/settings': return 'Restaurant Settings';
+      case '/customers': return 'Customer Management';
+      case '/qr-management': return 'QR Code Management';
+      case '/staff': return 'Staff Management';
+      case '/orders': return 'Order History';
       default: return 'Lumiere Bistro';
     }
   };
@@ -58,7 +81,7 @@ const Header = () => {
         }
       }
     } catch (err) {
-      console.error('Error fetching available tables:', err);
+      alert('Error loading available tables: ' + (err.message || err));
     } finally {
       setLoadingTables(false);
     }
@@ -135,16 +158,29 @@ const Header = () => {
         </div>
 
         {/* New Order Trigger */}
-        <button className="new-order-btn" onClick={handleOpenModal}>
-          <Plus size={16} />
-          <span>New Order</span>
-        </button>
+        {shiftActive && (
+          <button className="new-order-btn" onClick={handleOpenModal}>
+            <Plus size={16} />
+            <span>New Order</span>
+          </button>
+        )}
 
-        <div className="shift-badge">
-          <div className="status-dot"></div>
-          <span>Shift Active</span>
+        <div className="shift-badge-wrapper">
+          <div className={`shift-badge ${shiftActive ? 'active' : 'ended'}`} onClick={() => setShowShiftMenu(!showShiftMenu)}>
+            <div className={`status-dot ${shiftActive ? 'dot-active' : 'dot-ended'}`}></div>
+            <span>{shiftActive ? 'Shift Active' : 'Shift Ended'}</span>
+            <ChevronDown size={12} />
+          </div>
+          {showShiftMenu && (
+            <div className="shift-menu">
+              {shiftActive ? (
+                <button className="shift-menu-item" onClick={handleEndShift}><LogOut size={14} /> End Shift</button>
+              ) : (
+                <button className="shift-menu-item" onClick={handleStartShift}><LogOut size={14} /> Start New Shift</button>
+              )}
+            </div>
+          )}
         </div>
-        
         <button className="icon-btn">
           <Bell size={18} />
         </button>
@@ -154,6 +190,8 @@ const Header = () => {
           <span className="tooltip-support">Support Agent</span>
         </button>
       </div>
+
+      {showShiftMenu && <div className="shift-backdrop" onClick={() => setShowShiftMenu(false)} />}
 
       {/* New Order Modal */}
       {showModal && (
@@ -329,24 +367,28 @@ const Header = () => {
           color: white;
         }
 
+        .shift-badge-wrapper { position: relative; }
         .shift-badge {
           display: flex;
           align-items: center;
           gap: 0.35rem;
           padding: 0.5rem 0.85rem;
-          background: rgba(46, 125, 50, 0.05);
           border-radius: 8px;
           font-size: 0.8rem;
           font-weight: 700;
-          color: #2e7d32;
+          cursor: pointer;
+          user-select: none;
         }
+        .shift-badge.active { background: rgba(46, 125, 50, 0.05); color: #2e7d32; }
+        .shift-badge.ended { background: rgba(198, 40, 40, 0.05); color: #C62828; }
 
-        .status-dot {
-          width: 6px;
-          height: 6px;
-          background: #2e7d32;
-          border-radius: 50%;
-        }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .dot-active { background: #2e7d32; }
+        .dot-ended { background: #C62828; }
+
+        .shift-menu { position: absolute; top: calc(100% + 4px); right: 0; background: white; border: 1px solid var(--color-border); border-radius: 10px; box-shadow: var(--shadow-soft); overflow: hidden; z-index: 20; min-width: 160px; }
+        .shift-menu-item { display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.65rem 1rem; border: none; background: none; font-size: 0.82rem; font-weight: 600; color: var(--color-primary); cursor: pointer; }
+        .shift-menu-item:hover { background: var(--color-sidebar); }
 
         .icon-btn {
           display: flex;
@@ -368,6 +410,7 @@ const Header = () => {
           background: var(--color-accent-soft);
         }
 
+        .shift-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 15; }
         .font-support {
           gap: 0.25rem;
           width: auto;
